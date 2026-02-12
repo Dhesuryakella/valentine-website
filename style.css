@@ -299,7 +299,7 @@ body {
     padding: 2rem;
     position: relative;
     /* Eiffel Tower Integration */
-    background: url('eiffel_tower.png') no-repeat center bottom;
+    background: url('eiffel_tower.svg') no-repeat center bottom;
     background-size: cover;
     background-attachment: fixed;
     z-index: 1;
