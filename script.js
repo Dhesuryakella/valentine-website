@@ -89,7 +89,7 @@ class StarryBackground {
 }
 
 /* =====================
-   HEART FIREWORK (Realistic Sparkles)
+   HEART FIREWORK (Royal Red Velvet Hearts)
    ===================== */
 class HeartFirework {
     constructor(canvas) {
@@ -112,6 +112,19 @@ class HeartFirework {
         return (a * a * a - x * x * y * y * y) <= 0;
     }
 
+    drawHeartShape(ctx, x, y, size, color) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        // Heart shape path
+        ctx.moveTo(0, -size * 0.3);
+        ctx.bezierCurveTo(-size * 0.5, -size, -size, -size * 0.3, 0, size * 0.5);
+        ctx.bezierCurveTo(size, -size * 0.3, size * 0.5, -size, 0, -size * 0.3);
+        ctx.fill();
+        ctx.restore();
+    }
+
     launch() {
         this.resize();
         this.running = true;
@@ -121,10 +134,16 @@ class HeartFirework {
         const cy = this.canvas.height / 2;
         const heartSize = Math.min(this.canvas.width, this.canvas.height) * 0.35;
 
-        // Realistic Firework Colors (Gold, Red, Pink, White)
-        const colors = ['#ff4d8d', '#ff1744', '#ffd740', '#ffffff', '#ff80ab', '#d50000', '#d4af37'];
+        // Royal Red Velvet Palette
+        const colors = [
+            '#800020', // Burgundy
+            '#DC143C', // Crimson
+            '#C41E3A', // Cardinal
+            '#B22222', // Firebrick
+            '#FFD700'  // Gold Accent
+        ];
 
-        const step = 6;
+        const step = 8; // Fewer but larger particles for "Velvet" feel
         for (let gx = -heartSize * 1.2; gx < heartSize * 1.2; gx += step) {
             for (let gy = -heartSize * 1.5; gy < heartSize * 1.1; gy += step) {
                 const rx = gx + (Math.random() - 0.5) * step * 0.8;
@@ -132,16 +151,18 @@ class HeartFirework {
                 if (!this.insideHeart(rx, ry, heartSize)) continue;
 
                 this.particles.push({
-                    sx: cx, sy: cy, // Start from center (Explosion origin)
-                    tx: cx + rx, ty: cy + ry, // Target position
+                    sx: cx, sy: cy,
+                    tx: cx + rx, ty: cy + ry,
                     x: cx, y: cy,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    size: Math.random() * 2 + 1, // Spark size (dots)
+                    size: Math.random() * 4 + 2, // Larger hearts
                     alpha: 1,
                     delay: Math.random() * 5,
-                    duration: 20 + Math.random() * 10, // Fast explosion
+                    duration: 30 + Math.random() * 10,
                     drift: (Math.random() - 0.5) * 0.5,
-                    gravity: 0.05 // Adding simulated gravity for realism
+                    gravity: 0.05,
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 4
                 });
             }
         }
@@ -158,35 +179,32 @@ class HeartFirework {
         this.particles.forEach(p => {
             if (this.frame < p.delay) return;
 
-            // Explosion Phase
             const progress = Math.min((this.frame - p.delay) / p.duration, 1);
-            const ease = 1 - Math.pow(2, -10 * progress); // Exponential ease out
+            const ease = 1 - Math.pow(2, -10 * progress);
 
-            // Move particle
             if (progress < 1) {
                 p.x = p.sx + (p.tx - p.sx) * ease;
                 p.y = p.sy + (p.ty - p.sy) * ease;
             } else {
-                // Post-explosion: Drifting and Gravity
                 p.x += p.drift;
-                p.y += p.gravity * (this.frame - p.delay - p.duration); // Gravity accelerates
+                p.y += p.gravity * (this.frame - p.delay - p.duration);
+                p.rotation += p.rotSpeed;
             }
 
             // Fade out
-            if (this.frame > 50) p.alpha -= 0.015;
+            if (this.frame > 50) p.alpha -= 0.01;
 
             if (p.alpha > 0) {
                 alive++;
-
-                // Draw Realistic Glowy Spark
                 ctx.globalAlpha = p.alpha;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = p.color;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0; // Reset
+
+                // Draw rotating heart
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation * Math.PI / 180);
+                // Draw heart centered at 0,0 (after translate)
+                this.drawHeartShape(ctx, 0, 0, p.size, p.color);
+                ctx.restore();
             }
         });
 
