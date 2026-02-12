@@ -53,7 +53,8 @@ class HeartFirework {
         const cx = this.canvas.width / 2;
         const cy = this.canvas.height / 2;
         const heartSize = Math.min(this.canvas.width, this.canvas.height) * 0.35;
-        const colors = ['#ce9dba', '#8a3a54', '#d4af37', '#ffffff', '#c2185b']; // Premium palette
+        // Brighter, more vibrant palette mixed with gold
+        const colors = ['#ff4d8d', '#ff1744', '#ffd740', '#ffffff', '#ff80ab', '#d50000', '#d4af37'];
 
         const step = 6;
         for (let gx = -heartSize * 1.2; gx < heartSize * 1.2; gx += step) {
@@ -67,9 +68,9 @@ class HeartFirework {
                     tx: cx + rx, ty: cy + ry,
                     x: cx, y: cy,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    size: Math.random() * 3 + 1,
+                    size: Math.random() * 3 + 1.5, // Slightly larger
                     alpha: 0,
-                    maxAlpha: 0.8 + Math.random() * 0.2,
+                    maxAlpha: 1, // Full opacity
                     delay: Math.random() * 5,
                     duration: 15 + Math.random() * 10,
                     drift: (Math.random() - 0.5) * 0.5
@@ -100,6 +101,15 @@ class HeartFirework {
 
             if (p.alpha > 0) {
                 alive++;
+
+                // Add Glow Effect
+                ctx.globalAlpha = p.alpha * 0.5;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw Core
                 this.drawHeart(ctx, p.x, p.y, p.size, p.color, p.alpha);
             }
         });
