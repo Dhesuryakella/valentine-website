@@ -89,7 +89,7 @@ class StarryBackground {
 }
 
 /* =====================
-   HEART FIREWORK (Grand Royal Velvet)
+   HEART FIREWORK (Grand Royal Velvet - Optimized)
    ===================== */
 class HeartFirework {
     constructor(canvas) {
@@ -116,9 +116,9 @@ class HeartFirework {
         ctx.save();
         ctx.translate(x, y);
         ctx.fillStyle = color;
-        // Glow Effect
-        ctx.shadowBlur = size * 2; // Intense clean glow
-        ctx.shadowColor = color;
+        // Optimization: Removed shadowBlur to fix lag
+        // Use slight transparency for glow effect without performance hit
+        ctx.globalCompositeOperation = 'lighter';
         ctx.beginPath();
         // Heart shape path
         ctx.moveTo(0, -size * 0.3);
@@ -136,19 +136,19 @@ class HeartFirework {
         const cx = this.canvas.width / 2;
         const cy = this.canvas.height / 2;
 
-        // Much Larger Explosion
-        const heartSize = Math.min(this.canvas.width, this.canvas.height) * 0.45; // Increased scale
+        // Massive Scale
+        const heartSize = Math.min(this.canvas.width, this.canvas.height) * 0.5;
 
-        // Royal Palette - Brighter & More Elegant
+        // STRICT Royal Velvet Red Palette (No Gold/White)
         const colors = [
-            '#ff0033', // Brightest Red
-            '#ff1a1a', // Vivid Scarlet
-            '#ffd700', // Pure Gold
-            '#ffffff', // Sparkle White
-            '#800020'  // Deep Burgundy base
+            '#8a0303', // Blood Red
+            '#b80a0a', // Deep Crimson
+            '#4a0000', // Dark Velvet
+            '#c70039', // Royal Red
+            '#900c3f'  // Burgundy
         ];
 
-        const step = 9; // Spacing for cleaner look
+        const step = 10; // Optimized spacing
         for (let gx = -heartSize * 1.3; gx < heartSize * 1.3; gx += step) {
             for (let gy = -heartSize * 1.5; gy < heartSize * 1.2; gy += step) {
                 const rx = gx + (Math.random() - 0.5) * step * 0.8;
@@ -160,15 +160,15 @@ class HeartFirework {
                     tx: cx + rx, ty: cy + ry,
                     x: cx, y: cy,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    size: Math.random() * 5 + 4, // SIGNIFICANTLY LARGER (4px to 9px)
+                    size: Math.random() * 6 + 4, // Large visible hearts
                     alpha: 0,
-                    maxAlpha: 1,
-                    delay: Math.random() * 8, // Slightly longer build up
-                    duration: 35 + Math.random() * 10,
-                    drift: (Math.random() - 0.5) * 1, // More movement
-                    gravity: 0.08,
+                    maxAlpha: 0.9,
+                    delay: Math.random() * 6,
+                    duration: 40 + Math.random() * 10,
+                    drift: (Math.random() - 0.5) * 1.5,
+                    gravity: 0.06,
                     rotation: Math.random() * 360,
-                    rotSpeed: (Math.random() - 0.5) * 6
+                    rotSpeed: (Math.random() - 0.5) * 5
                 });
             }
         }
@@ -186,7 +186,6 @@ class HeartFirework {
             if (this.frame < p.delay) return;
 
             const progress = Math.min((this.frame - p.delay) / p.duration, 1);
-            // More explosive ease
             const ease = 1 - Math.pow(1 - progress, 3);
 
             if (progress < 1) {
@@ -198,9 +197,8 @@ class HeartFirework {
                 p.rotation += p.rotSpeed;
             }
 
-            // Fade logic
-            if (this.frame > 60) p.alpha -= 0.02;
-            else p.alpha = Math.min(1, p.alpha + 0.1); // Fade in pop
+            if (this.frame > 70) p.alpha -= 0.02;
+            else p.alpha = Math.min(p.maxAlpha, p.alpha + 0.05);
 
             if (p.alpha > 0) {
                 alive++;
