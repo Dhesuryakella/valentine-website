@@ -1032,8 +1032,7 @@ body {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(5, 0, 2, 0.95);
-    backdrop-filter: blur(15px);
+    background: radial-gradient(ellipse at center, rgba(255, 77, 141, .15), rgba(0, 0, 0, .93));
     display: flex;
     align-items: center;
     justify-content: center;
