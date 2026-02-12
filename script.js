@@ -89,7 +89,7 @@ class StarryBackground {
 }
 
 /* =====================
-   HEART FIREWORK (Royal Red Velvet Hearts)
+   HEART FIREWORK (Grand Royal Velvet)
    ===================== */
 class HeartFirework {
     constructor(canvas) {
@@ -116,6 +116,9 @@ class HeartFirework {
         ctx.save();
         ctx.translate(x, y);
         ctx.fillStyle = color;
+        // Glow Effect
+        ctx.shadowBlur = size * 2; // Intense clean glow
+        ctx.shadowColor = color;
         ctx.beginPath();
         // Heart shape path
         ctx.moveTo(0, -size * 0.3);
@@ -132,20 +135,22 @@ class HeartFirework {
         this.particles = [];
         const cx = this.canvas.width / 2;
         const cy = this.canvas.height / 2;
-        const heartSize = Math.min(this.canvas.width, this.canvas.height) * 0.35;
 
-        // Royal Red Velvet Palette
+        // Much Larger Explosion
+        const heartSize = Math.min(this.canvas.width, this.canvas.height) * 0.45; // Increased scale
+
+        // Royal Palette - Brighter & More Elegant
         const colors = [
-            '#800020', // Burgundy
-            '#DC143C', // Crimson
-            '#C41E3A', // Cardinal
-            '#B22222', // Firebrick
-            '#FFD700'  // Gold Accent
+            '#ff0033', // Brightest Red
+            '#ff1a1a', // Vivid Scarlet
+            '#ffd700', // Pure Gold
+            '#ffffff', // Sparkle White
+            '#800020'  // Deep Burgundy base
         ];
 
-        const step = 8; // Fewer but larger particles for "Velvet" feel
-        for (let gx = -heartSize * 1.2; gx < heartSize * 1.2; gx += step) {
-            for (let gy = -heartSize * 1.5; gy < heartSize * 1.1; gy += step) {
+        const step = 9; // Spacing for cleaner look
+        for (let gx = -heartSize * 1.3; gx < heartSize * 1.3; gx += step) {
+            for (let gy = -heartSize * 1.5; gy < heartSize * 1.2; gy += step) {
                 const rx = gx + (Math.random() - 0.5) * step * 0.8;
                 const ry = gy + (Math.random() - 0.5) * step * 0.8;
                 if (!this.insideHeart(rx, ry, heartSize)) continue;
@@ -155,14 +160,15 @@ class HeartFirework {
                     tx: cx + rx, ty: cy + ry,
                     x: cx, y: cy,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    size: Math.random() * 4 + 2, // Larger hearts
-                    alpha: 1,
-                    delay: Math.random() * 5,
-                    duration: 30 + Math.random() * 10,
-                    drift: (Math.random() - 0.5) * 0.5,
-                    gravity: 0.05,
+                    size: Math.random() * 5 + 4, // SIGNIFICANTLY LARGER (4px to 9px)
+                    alpha: 0,
+                    maxAlpha: 1,
+                    delay: Math.random() * 8, // Slightly longer build up
+                    duration: 35 + Math.random() * 10,
+                    drift: (Math.random() - 0.5) * 1, // More movement
+                    gravity: 0.08,
                     rotation: Math.random() * 360,
-                    rotSpeed: (Math.random() - 0.5) * 4
+                    rotSpeed: (Math.random() - 0.5) * 6
                 });
             }
         }
@@ -180,7 +186,8 @@ class HeartFirework {
             if (this.frame < p.delay) return;
 
             const progress = Math.min((this.frame - p.delay) / p.duration, 1);
-            const ease = 1 - Math.pow(2, -10 * progress);
+            // More explosive ease
+            const ease = 1 - Math.pow(1 - progress, 3);
 
             if (progress < 1) {
                 p.x = p.sx + (p.tx - p.sx) * ease;
@@ -191,18 +198,17 @@ class HeartFirework {
                 p.rotation += p.rotSpeed;
             }
 
-            // Fade out
-            if (this.frame > 50) p.alpha -= 0.01;
+            // Fade logic
+            if (this.frame > 60) p.alpha -= 0.02;
+            else p.alpha = Math.min(1, p.alpha + 0.1); // Fade in pop
 
             if (p.alpha > 0) {
                 alive++;
                 ctx.globalAlpha = p.alpha;
 
-                // Draw rotating heart
                 ctx.save();
                 ctx.translate(p.x, p.y);
                 ctx.rotate(p.rotation * Math.PI / 180);
-                // Draw heart centered at 0,0 (after translate)
                 this.drawHeartShape(ctx, 0, 0, p.size, p.color);
                 ctx.restore();
             }
