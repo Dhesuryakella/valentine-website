@@ -11,13 +11,16 @@ const selectAll = (sel) => document.querySelectorAll(sel);
 /* =====================
    OPENING SEQUENCE
    ===================== */
-class HeartFirework {
+/* =====================
+   REALISTIC FIREWORKS (Physics-based)
+   ===================== */
+class RealisticFirework {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.particles = [];
+        this.rockets = [];
         this.running = false;
-        this.frame = 0;
     }
 
     resize() {
@@ -25,103 +28,103 @@ class HeartFirework {
         this.canvas.height = window.innerHeight;
     }
 
-    insideHeart(px, py, size) {
-        const x = px / size;
-        const y = -py / size;
-        const a = x * x + y * y - 1;
-        return (a * a * a - x * x * y * y * y) <= 0;
-    }
-
-    drawHeart(ctx, x, y, size, color, alpha) {
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = color;
-        ctx.translate(x, y);
-        ctx.beginPath();
-        ctx.moveTo(0, -size * 0.3);
-        ctx.bezierCurveTo(-size * 0.5, -size, -size, -size * 0.3, 0, size * 0.5);
-        ctx.bezierCurveTo(size, -size * 0.3, size * 0.5, -size, 0, -size * 0.3);
-        ctx.fill();
-        ctx.restore();
-    }
-
     launch() {
         this.resize();
         this.running = true;
         this.frame = 0;
-        this.particles = [];
-        const cx = this.canvas.width / 2;
-        const cy = this.canvas.height / 2;
-        const heartSize = Math.min(this.canvas.width, this.canvas.height) * 0.35;
-        // Brighter, more vibrant palette mixed with gold
-        const colors = ['#ff4d8d', '#ff1744', '#ffd740', '#ffffff', '#ff80ab', '#d50000', '#d4af37'];
-
-        const step = 6;
-        for (let gx = -heartSize * 1.2; gx < heartSize * 1.2; gx += step) {
-            for (let gy = -heartSize * 1.5; gy < heartSize * 1.1; gy += step) {
-                const rx = gx + (Math.random() - 0.5) * step * 0.8;
-                const ry = gy + (Math.random() - 0.5) * step * 0.8;
-                if (!this.insideHeart(rx, ry, heartSize)) continue;
-
-                this.particles.push({
-                    sx: cx, sy: cy,
-                    tx: cx + rx, ty: cy + ry,
-                    x: cx, y: cy,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    size: Math.random() * 3 + 1.5, // Slightly larger
-                    alpha: 0,
-                    maxAlpha: 1, // Full opacity
-                    delay: Math.random() * 5,
-                    duration: 15 + Math.random() * 10,
-                    drift: (Math.random() - 0.5) * 0.5
-                });
-            }
+        // Launch initial barrage
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => this.createRocket(), i * 300);
         }
         this.animate();
     }
 
+    createRocket() {
+        const x = Math.random() * (this.canvas.width * 0.6) + (this.canvas.width * 0.2);
+        const targetY = Math.random() * (this.canvas.height * 0.4) + (this.canvas.height * 0.1);
+
+        this.rockets.push({
+            x: x,
+            y: this.canvas.height,
+            targetY: targetY,
+            speed: Math.random() * 3 + 8,
+            color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+            trail: []
+        });
+    }
+
+    explode(x, y, color) {
+        const particleCount = 100;
+        for (let i = 0; i < particleCount; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 5 + 2;
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                alpha: 1,
+                decay: Math.random() * 0.015 + 0.005,
+                color: color,
+                gravity: 0.1
+            });
+        }
+    }
+
     animate() {
         if (!this.running) return;
-        this.frame++;
+
         const ctx = this.ctx;
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        // Trail effect
+        ctx.fillStyle = 'rgba(5, 0, 2, 0.2)';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        let alive = 0;
-        this.particles.forEach(p => {
-            if (this.frame < p.delay) return;
-            const progress = Math.min((this.frame - p.delay) / p.duration, 1);
-            const ease = 1 - Math.pow(2, -10 * progress);
-
-            p.x = p.sx + (p.tx - p.sx) * ease + p.drift * this.frame * 0.1;
-            p.y = p.sy + (p.ty - p.sy) * ease + p.drift * this.frame * 0.1;
-
-            // Fade out logic remains similar for both
-            if (this.frame > 50) p.alpha = p.maxAlpha * (1 - (this.frame - 50) / 60);
-            else p.alpha = ease * p.maxAlpha;
-
-            if (p.alpha > 0) {
-                alive++;
-
-                // Add Glow Effect
-                ctx.globalAlpha = p.alpha * 0.5;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Draw Core
-                this.drawHeart(ctx, p.x, p.y, p.size, p.color, p.alpha);
+        // Update Rockets
+        this.rockets.forEach((r, i) => {
+            r.y -= r.speed;
+            if (r.y <= r.targetY) {
+                this.explode(r.x, r.y, r.color);
+                this.rockets.splice(i, 1);
+            } else {
+                ctx.fillStyle = r.color;
+                ctx.fillRect(r.x - 2, r.y, 4, 10);
             }
         });
 
-        if (alive > 0) requestAnimationFrame(() => this.animate());
-        else this.running = false;
+        // Update Particles
+        this.particles.forEach((p, i) => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += p.gravity;
+            p.alpha -= p.decay;
+
+            if (p.alpha <= 0) {
+                this.particles.splice(i, 1);
+            } else {
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        });
+
+        // Continue until manually stopped or fades out
+        if (this.rockets.length > 0 || this.particles.length > 0) {
+            requestAnimationFrame(() => this.animate());
+        } else {
+            // Keep loop running to clear canvas properly or stop if needed
+            // For this specific intro sequence, we act based on time in initOpening
+            requestAnimationFrame(() => this.animate());
+        }
     }
 }
 
 function initOpening() {
     const envelope = select('#envelope');
-    const fw = new HeartFirework(select('#fireworksCanvas'));
+    const fw = new RealisticFirework(select('#fireworksCanvas'));
     const musicBtn = select('#musicBtn');
 
     envelope.addEventListener('click', () => {
@@ -133,7 +136,7 @@ function initOpening() {
         music.play().catch(() => { });
         musicBtn.classList.add('playing');
 
-        setTimeout(() => fw.launch(), 800);
+        setTimeout(() => fw.launch(), 400);
 
         setTimeout(() => {
             select('#openingScreen').classList.add('fade-out');
@@ -141,10 +144,11 @@ function initOpening() {
             setTimeout(() => {
                 select('#mainContent').classList.add('visible');
                 select('#openingScreen').style.display = 'none';
+                fw.running = false; // Stop fireworks
                 musicBtn.classList.add('active');
                 typeWriter("Na Bangaram, here is our thread of fate... ❤️", 'heroSub', 40);
             }, 100);
-        }, 3500);
+        }, 4000);
     });
 }
 
@@ -163,33 +167,25 @@ function typeWriter(text, id, speed) {
 }
 
 /* =====================
-   TIMELINE ANIMATION
+   MILESTONE CARDS ANIMATION
    ===================== */
-function initTimeline() {
-    const progress = select('#tlProgress');
-    const items = selectAll('.tl-item');
+function initMilestoneCards() {
+    const cards = selectAll('.m-card');
 
-    // Animate Line on Scroll
-    window.addEventListener('scroll', () => {
-        const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (winScroll / height) * 100;
-        // Limit max height to not overshoot
-        if (progress) progress.style.height = scrolled + "%";
-
-        // Reveal Items
-        items.forEach(item => {
-            const rect = item.getBoundingClientRect();
-            if (rect.top < window.innerHeight * 0.85) {
-                item.classList.add('visible');
-                // Highlight dot when centered
-                if (rect.top > window.innerHeight * 0.4 && rect.top < window.innerHeight * 0.6) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
             }
         });
+    }, { threshold: 0.1 });
+
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(50px)';
+        card.style.transition = `all 0.6s ease-out ${index * 0.1}s`;
+        observer.observe(card);
     });
 }
 
@@ -330,13 +326,57 @@ function initMusic() {
 }
 
 /* =====================
+   HEART CURSOR TRAIL
+   ===================== */
+function initHeartCursor() {
+    const c = document.createElement('div');
+    c.id = 'sparkleTrail';
+    document.body.appendChild(c);
+
+    let last = 0;
+    const colors = ['#ce9dba', '#d4af37', '#8a3a54', '#ffffff', '#ff4d8d'];
+    const heartSVG = (color, size) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" xmlns="http://www.w3.org/2000/svg"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
+
+    document.addEventListener('mousemove', e => {
+        if (Date.now() - last < 50) return;
+        last = Date.now();
+        const h = document.createElement('div');
+        h.classList.add('cursor-heart');
+        const size = Math.random() * 12 + 8;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        h.innerHTML = heartSVG(color, size);
+        h.style.left = (e.clientX - size / 2) + 'px';
+        h.style.top = (e.clientY - size / 2) + 'px';
+        h.style.position = 'fixed';
+        h.style.pointerEvents = 'none';
+        h.style.zIndex = '9999';
+        h.style.transform = `rotate(${Math.random() * 360}deg) scale(0)`;
+        h.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+        h.style.opacity = '0.8';
+
+        c.appendChild(h);
+
+        requestAnimationFrame(() => {
+            h.style.transform = `rotate(${Math.random() * 360}deg) scale(1)`;
+        });
+
+        setTimeout(() => {
+            h.style.opacity = '0';
+            h.style.transform = `rotate(${Math.random() * 360}deg) scale(1.5)`;
+            setTimeout(() => h.remove(), 500);
+        }, 400);
+    });
+}
+
+/* =====================
    INIT
    ===================== */
 document.addEventListener('DOMContentLoaded', () => {
     initOpening();
-    initTimeline();
+    initMilestoneCards(); // Updated
     initGallery();
     initCountdown();
     initSurprise();
     initMusic();
+    initHeartCursor();
 });
