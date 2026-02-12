@@ -12,15 +12,27 @@ const selectAll = (sel) => document.querySelectorAll(sel);
    OPENING SEQUENCE
    ===================== */
 /* =====================
-   REALISTIC FIREWORKS (Physics-based)
+   DYNAMIC STARRY BACKGROUND
    ===================== */
-class RealisticFirework {
-    constructor(canvas) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
-        this.particles = [];
-        this.rockets = [];
-        this.running = false;
+class StarryBackground {
+    constructor() {
+        this.canvas = document.createElement('canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.canvas.id = 'starryCanvas';
+        this.canvas.style.position = 'fixed';
+        this.canvas.style.top = '0';
+        this.canvas.style.left = '0';
+        this.canvas.style.width = '100%';
+        this.canvas.style.height = '100%';
+        this.canvas.style.zIndex = '-1'; // Behind everything
+        this.canvas.style.pointerEvents = 'none';
+        document.body.prepend(this.canvas);
+
+        this.stars = [];
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+        this.initStars();
+        this.animate();
     }
 
     resize() {
@@ -28,103 +40,164 @@ class RealisticFirework {
         this.canvas.height = window.innerHeight;
     }
 
-    launch() {
-        this.resize();
-        this.running = true;
-        this.frame = 0;
-        // Launch initial barrage
-        for (let i = 0; i < 5; i++) {
-            setTimeout(() => this.createRocket(), i * 300);
-        }
-        this.animate();
-    }
-
-    createRocket() {
-        const x = Math.random() * (this.canvas.width * 0.6) + (this.canvas.width * 0.2);
-        const targetY = Math.random() * (this.canvas.height * 0.4) + (this.canvas.height * 0.1);
-
-        this.rockets.push({
-            x: x,
-            y: this.canvas.height,
-            targetY: targetY,
-            speed: Math.random() * 3 + 8,
-            color: `hsl(${Math.random() * 360}, 70%, 60%)`,
-            trail: []
-        });
-    }
-
-    explode(x, y, color) {
-        const particleCount = 100;
-        for (let i = 0; i < particleCount; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 5 + 2;
-            this.particles.push({
-                x: x,
-                y: y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                alpha: 1,
-                decay: Math.random() * 0.015 + 0.005,
-                color: color,
-                gravity: 0.1
+    initStars() {
+        const starCount = 150;
+        for (let i = 0; i < starCount; i++) {
+            this.stars.push({
+                x: Math.random() * this.canvas.width,
+                y: Math.random() * this.canvas.height,
+                size: Math.random() * 1.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.05 + 0.01,
+                twinkle: Math.random() * 0.02 + 0.005
             });
         }
     }
 
     animate() {
-        if (!this.running) return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        const ctx = this.ctx;
-        // Trail effect
-        ctx.fillStyle = 'rgba(5, 0, 2, 0.2)';
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Draw background gradient (Deep Night Sky)
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#050002'); // Deep velvet
+        gradient.addColorStop(1, '#1a0508'); // Dark burgundy
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Update Rockets
-        this.rockets.forEach((r, i) => {
-            r.y -= r.speed;
-            if (r.y <= r.targetY) {
-                this.explode(r.x, r.y, r.color);
-                this.rockets.splice(i, 1);
-            } else {
-                ctx.fillStyle = r.color;
-                ctx.fillRect(r.x - 2, r.y, 4, 10);
+        // Draw Stars
+        this.ctx.fillStyle = '#ffffff';
+        this.stars.forEach(star => {
+            this.ctx.globalAlpha = star.alpha;
+            this.ctx.beginPath();
+            this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            this.ctx.fill();
+
+            // Twinkle effect
+            star.alpha += star.twinkle;
+            if (star.alpha > 1 || star.alpha < 0.2) star.twinkle *= -1;
+
+            // Movement (Parallax)
+            star.y -= star.speed;
+            if (star.y < 0) {
+                star.y = this.canvas.height;
+                star.x = Math.random() * this.canvas.width;
             }
         });
 
-        // Update Particles
-        this.particles.forEach((p, i) => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.vy += p.gravity;
-            p.alpha -= p.decay;
+        requestAnimationFrame(() => this.animate());
+    }
+}
 
-            if (p.alpha <= 0) {
-                this.particles.splice(i, 1);
+/* =====================
+   HEART FIREWORK (Realistic Sparkles)
+   ===================== */
+class HeartFirework {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.particles = [];
+        this.running = false;
+        this.frame = 0;
+    }
+
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+
+    insideHeart(px, py, size) {
+        const x = px / size;
+        const y = -py / size;
+        const a = x * x + y * y - 1;
+        return (a * a * a - x * x * y * y * y) <= 0;
+    }
+
+    launch() {
+        this.resize();
+        this.running = true;
+        this.frame = 0;
+        this.particles = [];
+        const cx = this.canvas.width / 2;
+        const cy = this.canvas.height / 2;
+        const heartSize = Math.min(this.canvas.width, this.canvas.height) * 0.35;
+
+        // Realistic Firework Colors (Gold, Red, Pink, White)
+        const colors = ['#ff4d8d', '#ff1744', '#ffd740', '#ffffff', '#ff80ab', '#d50000', '#d4af37'];
+
+        const step = 6;
+        for (let gx = -heartSize * 1.2; gx < heartSize * 1.2; gx += step) {
+            for (let gy = -heartSize * 1.5; gy < heartSize * 1.1; gy += step) {
+                const rx = gx + (Math.random() - 0.5) * step * 0.8;
+                const ry = gy + (Math.random() - 0.5) * step * 0.8;
+                if (!this.insideHeart(rx, ry, heartSize)) continue;
+
+                this.particles.push({
+                    sx: cx, sy: cy, // Start from center (Explosion origin)
+                    tx: cx + rx, ty: cy + ry, // Target position
+                    x: cx, y: cy,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 2 + 1, // Spark size (dots)
+                    alpha: 1,
+                    delay: Math.random() * 5,
+                    duration: 20 + Math.random() * 10, // Fast explosion
+                    drift: (Math.random() - 0.5) * 0.5,
+                    gravity: 0.05 // Adding simulated gravity for realism
+                });
+            }
+        }
+        this.animate();
+    }
+
+    animate() {
+        if (!this.running) return;
+        this.frame++;
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        let alive = 0;
+        this.particles.forEach(p => {
+            if (this.frame < p.delay) return;
+
+            // Explosion Phase
+            const progress = Math.min((this.frame - p.delay) / p.duration, 1);
+            const ease = 1 - Math.pow(2, -10 * progress); // Exponential ease out
+
+            // Move particle
+            if (progress < 1) {
+                p.x = p.sx + (p.tx - p.sx) * ease;
+                p.y = p.sy + (p.ty - p.sy) * ease;
             } else {
-                ctx.save();
+                // Post-explosion: Drifting and Gravity
+                p.x += p.drift;
+                p.y += p.gravity * (this.frame - p.delay - p.duration); // Gravity accelerates
+            }
+
+            // Fade out
+            if (this.frame > 50) p.alpha -= 0.015;
+
+            if (p.alpha > 0) {
+                alive++;
+
+                // Draw Realistic Glowy Spark
                 ctx.globalAlpha = p.alpha;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = p.color;
                 ctx.fillStyle = p.color;
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.restore();
+                ctx.shadowBlur = 0; // Reset
             }
         });
 
-        // Continue until manually stopped or fades out
-        if (this.rockets.length > 0 || this.particles.length > 0) {
-            requestAnimationFrame(() => this.animate());
-        } else {
-            // Keep loop running to clear canvas properly or stop if needed
-            // For this specific intro sequence, we act based on time in initOpening
-            requestAnimationFrame(() => this.animate());
-        }
+        if (alive > 0) requestAnimationFrame(() => this.animate());
+        else this.running = false;
     }
 }
 
 function initOpening() {
     const envelope = select('#envelope');
-    const fw = new RealisticFirework(select('#fireworksCanvas'));
+    const fw = new HeartFirework(select('#fireworksCanvas'));
     const musicBtn = select('#musicBtn');
 
     envelope.addEventListener('click', () => {
@@ -136,7 +209,7 @@ function initOpening() {
         music.play().catch(() => { });
         musicBtn.classList.add('playing');
 
-        setTimeout(() => fw.launch(), 400);
+        setTimeout(() => fw.launch(), 800);
 
         setTimeout(() => {
             select('#openingScreen').classList.add('fade-out');
@@ -144,11 +217,10 @@ function initOpening() {
             setTimeout(() => {
                 select('#mainContent').classList.add('visible');
                 select('#openingScreen').style.display = 'none';
-                fw.running = false; // Stop fireworks
                 musicBtn.classList.add('active');
                 typeWriter("Na Bangaram, here is our thread of fate... ❤️", 'heroSub', 40);
             }, 100);
-        }, 4000);
+        }, 3500);
     });
 }
 
@@ -372,6 +444,7 @@ function initHeartCursor() {
    INIT
    ===================== */
 document.addEventListener('DOMContentLoaded', () => {
+    new StarryBackground(); // Added Dynamic Background
     initOpening();
     initMilestoneCards(); // Updated
     initGallery();
