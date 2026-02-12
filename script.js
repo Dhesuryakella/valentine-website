@@ -399,18 +399,22 @@ function createFallingHeart() {
 }
 
 function initMusic() {
-    const btn = select('#musicBtn');
-    const audio = select('#bgMusic');
+    const musicBtn = select('#musicBtn');
+    const bgMusic = select('#bgMusic');
 
-    if (!btn || !audio) return;
+    if (!musicBtn || !bgMusic) return;
 
-    btn.addEventListener('click', () => {
-        if (audio.paused) {
-            audio.play();
-            btn.classList.add('playing');
+    musicBtn.addEventListener('click', () => {
+        if (bgMusic.paused) {
+            bgMusic.play().then(() => {
+                musicBtn.classList.add('playing');
+            }).catch(e => {
+                console.log("Audio playback failed (likely empty or missing file):", e);
+                alert("Please add your 'music.mp3' file to the project folder!");
+            });
         } else {
-            audio.pause();
-            btn.classList.remove('playing');
+            bgMusic.pause();
+            musicBtn.classList.remove('playing');
         }
     });
 }
