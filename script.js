@@ -92,6 +92,9 @@ class StarryBackground {
 /* =====================
    HEART FIREWORK (Cinematic Pure Heart - Optimized)
    ===================== */
+/* =====================
+   ORIGINAL HEART FIREWORK (Restored)
+   ===================== */
 class HeartFirework {
     constructor(canvas) {
         this.canvas = canvas;
@@ -106,36 +109,17 @@ class HeartFirework {
         this.canvas.height = window.innerHeight;
     }
 
-    // Parametric Heart Equation for "Pure" Shape
-    getHeartPoint(t, size) {
-        const x = 16 * Math.pow(Math.sin(t), 3);
-        const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-        return { x: x * size, y: y * size };
-    }
-
-    drawSparkle(ctx, x, y, size, color, alpha, vx, vy) {
+    drawSparkle(ctx, x, y, size, color, alpha) {
         ctx.save();
-        ctx.translate(x, y);
-
-        // Motion Streak (Directional tail)
-        const stretch = 2;
-        const angle = Math.atan2(vy, vx);
-        ctx.rotate(angle);
-
-        // Glow Gradient
-        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 2);
-        gradient.addColorStop(0, '#ffffff'); // Hot center
-        gradient.addColorStop(0.3, color);   // Velvet color
-        gradient.addColorStop(1, 'transparent');
-
-        ctx.fillStyle = gradient;
-        ctx.globalAlpha = alpha;
-
-        // Draw the streak
         ctx.beginPath();
-        ctx.ellipse(0, 0, size * stretch, size * 0.6, 0, 0, Math.PI * 2);
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, size * 1.5);
+        grad.addColorStop(0, '#fff');
+        grad.addColorStop(0.3, color);
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.globalAlpha = alpha;
+        ctx.arc(x, y, size, 0, Math.PI * 2);
         ctx.fill();
-
         ctx.restore();
     }
 
@@ -145,39 +129,31 @@ class HeartFirework {
         this.frame = 0;
         this.particles = [];
         const cx = this.canvas.width / 2;
-        const cy = this.canvas.height * 0.45; // Centered vertically
+        const cy = this.canvas.height / 2;
+        const size = Math.min(this.canvas.width, this.canvas.height) * 0.4;
 
-        // Explosion Scale
-        const scale = Math.min(this.canvas.width, this.canvas.height) * 0.025;
+        const colors = ['#ff4d6d', '#ff758f', '#ff8fa3', '#ffb3c1', '#ffffff'];
 
-        // STRICT Royal Red Velvet Palette
-        const colors = [
-            '#ff0033', // Bright Scarlet
-            '#cc0000', // Crimson
-            '#800000', // Maroon
-            '#ff4d4d', // Light Red (Sparkle intensity)
-            '#b30000'  // Strong Red
-        ];
-
-        // Generate particles along the heart outline (Pure shape)
-        const particleCount = 280;
-        for (let i = 0; i < particleCount; i++) {
-            const t = (i / particleCount) * Math.PI * 2;
-            const target = this.getHeartPoint(t, scale);
+        // Original Heart Particle Generation
+        for (let i = 0; i < 200; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const r = Math.sqrt(Math.random());
+            const t = angle;
+            const tx = 16 * Math.pow(Math.sin(t), 3);
+            const ty = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
 
             this.particles.push({
                 sx: cx, sy: cy,
-                tx: cx + target.x, ty: cy + target.y,
+                tx: cx + tx * size / 16,
+                ty: cy + ty * size / 16,
                 x: cx, y: cy,
-                vx: target.x * 0.15, vy: target.y * 0.15, // Initial velocity
                 color: colors[Math.floor(Math.random() * colors.length)],
                 size: Math.random() * 3 + 2,
                 alpha: 0,
-                maxAlpha: 1,
-                delay: Math.random() * 5,
-                duration: 60 + Math.random() * 20,
-                shimmer: Math.random() * 0.1,
-                gravity: 0.04
+                maxAlpha: Math.random() * 0.5 + 0.5,
+                delay: Math.random() * 10,
+                duration: 40 + Math.random() * 20,
+                drift: (Math.random() - 0.5) * 2
             });
         }
         this.animate();
@@ -192,28 +168,18 @@ class HeartFirework {
         let alive = 0;
         this.particles.forEach(p => {
             if (this.frame < p.delay) return;
-
             const progress = Math.min((this.frame - p.delay) / p.duration, 1);
-            const ease = 1 - Math.pow(1 - progress, 4); // Fast expand, slow drift
+            const ease = 1 - Math.pow(2, -10 * progress);
 
-            if (progress < 1) {
-                // Expansion phase
-                p.x = p.sx + (p.tx - p.sx) * ease;
-                p.y = p.sy + (p.ty - p.sy) * ease;
-                p.alpha = Math.min(1, p.alpha + 0.1);
-            } else {
-                // Drift and Gravity phase
-                p.x += (p.tx - p.sx) * 0.01; // Tiny persistent drift
-                p.y += p.gravity;
-                p.alpha -= 0.015; // Slow fade
-            }
+            p.x = p.sx + (p.tx - p.sx) * ease + p.drift * this.frame * 0.1;
+            p.y = p.sy + (p.ty - p.sy) * ease + p.drift * this.frame * 0.1;
 
-            // Random shimmer sparkle
-            const currentAlpha = p.alpha * (1 - Math.random() * p.shimmer);
+            if (this.frame > 50) p.alpha = p.maxAlpha * (1 - (this.frame - 50) / 60);
+            else p.alpha = ease * p.maxAlpha;
 
             if (p.alpha > 0) {
                 alive++;
-                this.drawSparkle(ctx, p.x, p.y, p.size, p.color, currentAlpha, p.tx - p.sx, p.ty - p.sy);
+                this.drawSparkle(ctx, p.x, p.y, p.size, p.color, p.alpha);
             }
         });
 

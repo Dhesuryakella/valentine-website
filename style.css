@@ -298,11 +298,9 @@ body {
     text-align: center;
     padding: 2rem;
     position: relative;
-    /* Eiffel Tower Integration - Better Cropping */
+    /* Eiffel Tower Integration - Original Feel */
     background: url('eiffel-pinnacle-with-captivating-full-moon4_1247965-89499.jpg') no-repeat center bottom;
     background-size: cover;
-    background-position: center 25%;
-    /* Frame the top/moon better */
     background-attachment: fixed;
     z-index: 1;
 }
@@ -310,7 +308,7 @@ body {
 @media (max-width: 768px) {
     .hero {
         background-attachment: scroll;
-        /* Fix mobile repaint lag */
+        /* Mobile optimization */
     }
 }
 
