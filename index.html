@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Bangaram ❤️</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ===== OPENING SCREEN (Pure Black + Envelope) ===== -->
+    <div class="opening-screen" id="openingScreen">
+        <div class="envelope-3d" id="envelope">
+            <div class="env-body">
+                <div class="env-flap"></div>
+                <div class="env-front">
+                    <span class="env-heart">💌</span>
+                    <span class="env-text">Tap to Open</span>
+                </div>
+            </div>
+        </div>
+        <canvas id="fireworksCanvas"></canvas>
+    </div>
+
+    <!-- ===== MAIN CONTENT (hidden until envelope opens) ===== -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Floating Hearts & Sparkle -->
+        <div class="hearts-bg" id="heartsBg"></div>
+        <div id="sparkleTrail"></div>
+
+        <!-- Hero -->
+        <section class="hero" id="hero">
+            <h1 class="hero-title">
+                <span class="ht-line ht-1">Happy Valentine's Day</span>
+                <span class="ht-line ht-2">Bujjamma ❤️</span>
+            </h1>
+            <p class="hero-sub" id="heroSub"></p>
+
+            <div class="scroll-hint">
+                <span>Scroll down to relive our story</span>
+                <div class="scroll-mouse">
+                    <div class="scroll-wheel"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MILESTONES -->
+        <section class="section" id="milestones">
+            <div class="container">
+                <h2 class="sec-title">Our Love Story, Kanna</h2>
+                <p class="sec-sub">Every chapter with you is my favorite</p>
+
+                <!-- 1 -->
+                <div class="card card-l" data-card>
+                    <div class="card-badge">
+                        <span class="cb-m">SEP</span><span class="cb-d">16</span><span class="cb-y">2024</span>
+                    </div>
+                    <div class="card-icon">
+                        <div class="ci-glow"></div>
+                        <div class="css-heart"></div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-num">01</span>
+                        <h3>The Day We Met</h3>
+                        <div class="card-line"></div>
+                        <p>September 16, 2024 — the day my world got its colors. Among all the people in this universe,
+                            fate brought me to you, Bangaram. That single moment was the start of our most beautiful
+                            love story.</p>
+                        <q>Some souls recognize each other by vibes, not appearances.</q>
+                        <div class="card-counter"><span class="cc-num" id="daysSinceMet">---</span><span
+                                class="cc-lbl">days since we met</span></div>
+                    </div>
+                </div>
+
+                <!-- 2 -->
+                <div class="card card-r" data-card>
+                    <div class="card-badge badge-amber">
+                        <span class="cb-m">OCT</span><span class="cb-d">14</span><span class="cb-y">2024</span>
+                    </div>
+                    <div class="card-icon">
+                        <div class="ci-glow glow-amber"></div>
+                        <div class="css-heart heart-amber"></div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-num">02</span>
+                        <h3>Our First War</h3>
+                        <div class="card-line line-amber"></div>
+                        <p>October 14, 2024 — every love story has storms, Kanna. That fight taught me something
+                            beautiful — even when we're angry, we can't stay away from each other. What we have is
+                            bigger than any argument. 💪</p>
+                        <q>A real relationship is two imperfect people refusing to give up on each other.</q>
+                        <div class="card-counter"><span class="cc-num" id="daysSinceFight">---</span><span
+                                class="cc-lbl">days since our first war</span></div>
+                    </div>
+                </div>
+
+                <!-- 3 -->
+                <div class="card card-l" data-card>
+                    <div class="card-badge badge-blue">
+                        <span class="cb-m">NOV</span><span class="cb-d">18</span><span class="cb-y">2024</span>
+                    </div>
+                    <div class="card-icon">
+                        <div class="ci-glow glow-blue"></div>
+                        <div class="css-heart heart-blue"></div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-num">03</span>
+                        <h3>First Video Call</h3>
+                        <div class="card-line line-blue"></div>
+                        <p>November 18, 2024 — I finally saw your face, Bujjamma, and my heart forgot how to function.
+                            Your smile through that screen lit up my room. That call turned minutes into seconds — I
+                            never wanted it to end. 🥰</p>
+                        <q>Distance means so little when someone means so much.</q>
+                        <div class="card-counter"><span class="cc-num" id="daysSinceVC">---</span><span
+                                class="cc-lbl">days since our first VC</span></div>
+                    </div>
+                </div>
+
+                <!-- 4 -->
+                <div class="card card-r" data-card>
+                    <div class="card-badge badge-purple">
+                        <span class="cb-m">DEC</span><span class="cb-d">26</span><span class="cb-y">2024</span>
+                    </div>
+                    <div class="card-icon">
+                        <div class="ci-glow glow-purple"></div>
+                        <div class="css-heart heart-purple"></div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-num">04</span>
+                        <h3>She Proposed!</h3>
+                        <div class="card-line line-purple"></div>
+                        <p>December 26, 2024 — my Kannalu asked me the most beautiful question. You proposed to me, and
+                            my world stopped. That "yes" was the easiest word I ever said, because my heart had already
+                            answered long before. 🥺❤️</p>
+                        <q>You had me at the moment you were brave enough to ask.</q>
+                        <div class="card-counter"><span class="cc-num" id="daysSinceProposal">---</span><span
+                                class="cc-lbl">days since you proposed</span></div>
+                    </div>
+                </div>
+
+                <!-- 5 -->
+                <div class="card card-l" data-card>
+                    <div class="card-badge badge-hot">
+                        <span class="cb-m">JAN</span><span class="cb-d">03</span><span class="cb-y">2025</span>
+                    </div>
+                    <div class="card-icon">
+                        <div class="ci-glow glow-hot"></div>
+                        <div class="css-heart heart-hot"></div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-num">05</span>
+                        <h3>Our First Kiss</h3>
+                        <div class="card-line line-hot"></div>
+                        <p>January 3, 2025 — time stopped, Nanna. You kissed me, and in that one perfect moment, I
+                            understood why people write love songs. My heart has been yours ever since. That kiss sealed
+                            something eternal between us. ❤️‍🔥</p>
+                        <q>A kiss is a secret told to the mouth instead of the ear.</q>
+                        <div class="card-counter"><span class="cc-num" id="daysSinceKiss">---</span><span
+                                class="cc-lbl">days since our first kiss</span></div>
+                    </div>
+                </div>
+
+                <!-- 6 -->
+                <div class="card card-r" data-card>
+                    <div class="card-badge badge-rose">
+                        <span class="cb-m">FEB</span><span class="cb-d">04</span><span class="cb-y">2025</span>
+                    </div>
+                    <div class="card-icon">
+                        <div class="ci-glow glow-rose"></div>
+                        <div class="css-heart heart-rose"></div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-num">06</span>
+                        <h3>We Became Official</h3>
+                        <div class="card-line"></div>
+                        <p>February 4, 2025 — the day I became the luckiest person alive, Bangaram. From strangers to
+                            soulmates, every step led here. You're not just my girlfriend — you're my best friend, my
+                            peace, my forever person. 🫶</p>
+                        <q>I am yours. Don't give myself back to me.</q>
+                        <div class="card-counter"><span class="cc-num" id="daysTogether">---</span><span
+                                class="cc-lbl">days officially together ❤️</span></div>
+                    </div>
+                </div>
+
+                <!-- 7 - Valentine's -->
+                <div class="card card-special" data-card>
+                    <div class="card-badge badge-gold">
+                        <span class="cb-m">FEB</span><span class="cb-d">14</span><span class="cb-y">2026</span>
+                    </div>
+                    <div class="card-icon">
+                        <div class="ci-glow glow-gold"></div>
+                        <div class="css-heart heart-gold big-heart"></div>
+                    </div>
+                    <div class="card-body">
+                        <span class="card-num">07</span>
+                        <h3 class="gold-title">Our First Valentine's Day</h3>
+                        <div class="card-line line-gold"></div>
+                        <p>This is OUR first Valentine's Day, Bujjamma! From September 16th to forever — look how far
+                            we've come. Every love song makes sense now. You're my Bangaram, my Kanna, my Kannalu, my
+                            everything. 🥰</p>
+                        <q>Every love story is beautiful, but ours is my absolute favorite.</q>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- LOVE LETTER -->
+        <section class="section" id="letter">
+            <div class="container">
+                <div class="letter-card">
+                    <div class="letter-lines"></div>
+                    <span class="letter-seal">❤️</span>
+                    <h2 class="letter-heading">My Dearest Bangaram</h2>
+                    <div class="letter-text">
+                        <p>Nanna, I still remember September 16th like it was yesterday. The day I met you, something
+                            shifted inside me — like the universe finally made sense.</p>
+                        <p>We've had our fights (remember October 14th? 😄), our first shy video call where I couldn't
+                            stop smiling, and then came December 26th — the day YOU proposed to ME. Kanna, that was the
+                            bravest, most beautiful thing anyone has ever done for me.</p>
+                        <p>And then January 3rd... our first kiss. Bujjamma, I still get butterflies thinking about it.
+                            That moment sealed everything.</p>
+                        <p>February 4th made it official, but my heart chose you long before that. You're my Bangaram —
+                            my gold, my treasure, the most precious person in my world.</p>
+                        <p>This Valentine's Day, Kannalu, I want you to know — you're my home, my peace, my happy place,
+                            and my biggest blessing. ❤️</p>
+                        <p class="letter-close">I love you endlessly, my Bujjamma. 💕</p>
+                        <p class="letter-sig">Forever & Always,<br>Your Person ❤️</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECRETS -->
+        <section class="section" id="secrets">
+            <div class="container">
+                <h2 class="sec-title">Things I Love About You, Kanna</h2>
+                <p class="sec-sub">Tap each heart to reveal a secret 💕</p>
+                <div class="secrets-grid">
+                    <div class="s-card"
+                        data-msg="The way your eyes light up when you talk about things you love, Kannalu 🥺"><span
+                            class="s-heart">💗</span><span class="s-label">#1</span>
+                        <p class="s-msg"></p>
+                    </div>
+                    <div class="s-card"
+                        data-msg="How you proposed to me on Dec 26th — the bravest thing ever, Bangaram 💍"><span
+                            class="s-heart">💗</span><span class="s-label">#2</span>
+                        <p class="s-msg"></p>
+                    </div>
+                    <div class="s-card"
+                        data-msg="Your voice on our first VC — I replayed that feeling for days, Nanna 📹"><span
+                            class="s-heart">💗</span><span class="s-label">#3</span>
+                        <p class="s-msg"></p>
+                    </div>
+                    <div class="s-card"
+                        data-msg="Even our fights make us stronger. You're worth every storm, Kanna ⛈️❤️"><span
+                            class="s-heart">💗</span><span class="s-label">#4</span>
+                        <p class="s-msg"></p>
+                    </div>
+                    <div class="s-card" data-msg="How safe and loved you make me feel — you're my home, Bujjamma 🏠">
+                        <span class="s-heart">💗</span><span class="s-label">#5</span>
+                        <p class="s-msg"></p>
+                    </div>
+                    <div class="s-card"
+                        data-msg="I fall in love with you all over again every single day, my Bangaram 💫"><span
+                            class="s-heart">💗</span><span class="s-label">#6</span>
+                        <p class="s-msg"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COUNTDOWN -->
+        <section class="section" id="countdown">
+            <div class="container">
+                <h2 class="sec-title" id="cdTitle">💕 Valentine's Day Countdown 💕</h2>
+                <div class="cd-row">
+                    <div class="cd-box"><span class="cd-num" id="cdDays">00</span><span class="cd-lbl">Days</span></div>
+                    <span class="cd-sep">:</span>
+                    <div class="cd-box"><span class="cd-num" id="cdHours">00</span><span class="cd-lbl">Hours</span>
+                    </div>
+                    <span class="cd-sep">:</span>
+                    <div class="cd-box"><span class="cd-num" id="cdMins">00</span><span class="cd-lbl">Minutes</span>
+                    </div>
+                    <span class="cd-sep">:</span>
+                    <div class="cd-box"><span class="cd-num" id="cdSecs">00</span><span class="cd-lbl">Seconds</span>
+                    </div>
+                </div>
+                <p class="cd-msg" id="cdMsg">Until our special day, Bangaram... 💕</p>
+            </div>
+        </section>
+
+        <!-- FINALE -->
+        <section class="section finale" id="finale">
+            <div class="container">
+                <div class="finale-heart">❤️</div>
+                <h2 class="finale-title">I Love You, Bangaram</h2>
+                <p class="finale-sub">From Sep 16, 2024 → Forever & Always, Bujjamma ❤️</p>
+                <button class="surprise-btn" id="surpriseBtn">Tap for a Surprise, Kanna ✨</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Music -->
+    <button class="music-btn" id="musicBtn">🎵</button>
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
