@@ -1032,13 +1032,16 @@ body {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(5, 0, 2, 0.95);
-    backdrop-filter: blur(15px);
+    background: radial-gradient(circle at center, rgba(20, 5, 10, 0.98), #000);
+    backdrop-filter: blur(20px);
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
     animation: fadeInOverlay 0.5s ease forwards;
+    /* Subtle texture */
+    background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
 }
 
 @keyframes fadeInOverlay {

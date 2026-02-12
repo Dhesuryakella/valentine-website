@@ -60,7 +60,25 @@ class HeartFirework {
             for (let gy = -heartSize * 1.5; gy < heartSize * 1.1; gy += step) {
                 const rx = gx + (Math.random() - 0.5) * step * 0.8;
                 const ry = gy + (Math.random() - 0.5) * step * 0.8;
-                if (!this.insideHeart(rx, ry, heartSize)) continue;
+                if (!this.insideHeart(rx, ry, heartSize)) {
+                    // Fill the void with "Stardust"
+                    if (Math.random() < 0.02) {
+                        this.particles.push({
+                            sx: cx, sy: cy,
+                            tx: cx + rx, ty: cy + ry,
+                            x: cx, y: cy,
+                            color: 'rgba(255, 255, 255, ' + (Math.random() * 0.5) + ')',
+                            size: Math.random() * 2,
+                            alpha: 0,
+                            maxAlpha: 0.3,
+                            delay: Math.random() * 10,
+                            duration: 40 + Math.random() * 20,
+                            drift: 0,
+                            isBackground: true
+                        });
+                    }
+                    continue;
+                }
 
                 this.particles.push({
                     sx: cx, sy: cy,
@@ -72,7 +90,8 @@ class HeartFirework {
                     maxAlpha: 0.8 + Math.random() * 0.2,
                     delay: Math.random() * 5,
                     duration: 15 + Math.random() * 10,
-                    drift: (Math.random() - 0.5) * 0.5
+                    drift: (Math.random() - 0.5) * 0.5,
+                    isBackground: false
                 });
             }
         }
@@ -94,13 +113,21 @@ class HeartFirework {
             p.x = p.sx + (p.tx - p.sx) * ease + p.drift * this.frame * 0.1;
             p.y = p.sy + (p.ty - p.sy) * ease + p.drift * this.frame * 0.1;
 
-            // Fade out
+            // Fade out logic remains similar for both
             if (this.frame > 50) p.alpha = p.maxAlpha * (1 - (this.frame - 50) / 60);
             else p.alpha = ease * p.maxAlpha;
 
             if (p.alpha > 0) {
                 alive++;
-                this.drawHeart(ctx, p.x, p.y, p.size, p.color, p.alpha);
+                if (p.isBackground) {
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.alpha;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    this.drawHeart(ctx, p.x, p.y, p.size, p.color, p.alpha);
+                }
             }
         });
 
