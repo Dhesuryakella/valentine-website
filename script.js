@@ -9,29 +9,31 @@ const select = (sel) => document.querySelector(sel);
 const selectAll = (sel) => document.querySelectorAll(sel);
 
 /* =====================
-   OPENING SEQUENCE
-   ===================== */
-/* =====================
-   DYNAMIC STARRY BACKGROUND
+   DYNAMIC STARRY BACKGROUND (Optimized)
    ===================== */
 class StarryBackground {
     constructor() {
         this.canvas = document.createElement('canvas');
-        this.ctx = this.canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d', { alpha: false });
         this.canvas.id = 'starryCanvas';
         this.canvas.style.position = 'fixed';
         this.canvas.style.top = '0';
         this.canvas.style.left = '0';
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
-        this.canvas.style.zIndex = '-1'; // Behind everything
+        this.canvas.style.zIndex = '-1';
         this.canvas.style.pointerEvents = 'none';
         document.body.prepend(this.canvas);
 
         this.stars = [];
+        this.gradient = null;
         this.resize();
-        window.addEventListener('resize', () => this.resize());
+        window.addEventListener('resize', () => {
+            this.resize();
+            this.createGradient();
+        });
         this.initStars();
+        this.createGradient();
         this.animate();
     }
 
@@ -40,8 +42,14 @@ class StarryBackground {
         this.canvas.height = window.innerHeight;
     }
 
+    createGradient() {
+        this.gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        this.gradient.addColorStop(0, '#050002');
+        this.gradient.addColorStop(1, '#1a0508');
+    }
+
     initStars() {
-        const starCount = 150;
+        const starCount = 60; // Reduced count
         for (let i = 0; i < starCount; i++) {
             this.stars.push({
                 x: Math.random() * this.canvas.width,
@@ -55,16 +63,11 @@ class StarryBackground {
     }
 
     animate() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if (!this.gradient) return;
 
-        // Draw background gradient (Deep Night Sky)
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#050002'); // Deep velvet
-        gradient.addColorStop(1, '#1a0508'); // Dark burgundy
-        this.ctx.fillStyle = gradient;
+        this.ctx.fillStyle = this.gradient;
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw Stars
         this.ctx.fillStyle = '#ffffff';
         this.stars.forEach(star => {
             this.ctx.globalAlpha = star.alpha;
@@ -72,11 +75,9 @@ class StarryBackground {
             this.ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
             this.ctx.fill();
 
-            // Twinkle effect
             star.alpha += star.twinkle;
             if (star.alpha > 1 || star.alpha < 0.2) star.twinkle *= -1;
 
-            // Movement (Parallax)
             star.y -= star.speed;
             if (star.y < 0) {
                 star.y = this.canvas.height;
@@ -116,11 +117,7 @@ class HeartFirework {
         ctx.save();
         ctx.translate(x, y);
         ctx.fillStyle = color;
-        // Optimization: Removed shadowBlur to fix lag
-        // Use slight transparency for glow effect without performance hit
-        ctx.globalCompositeOperation = 'lighter';
         ctx.beginPath();
-        // Heart shape path
         ctx.moveTo(0, -size * 0.3);
         ctx.bezierCurveTo(-size * 0.5, -size, -size, -size * 0.3, 0, size * 0.5);
         ctx.bezierCurveTo(size, -size * 0.3, size * 0.5, -size, 0, -size * 0.3);
@@ -136,19 +133,13 @@ class HeartFirework {
         const cx = this.canvas.width / 2;
         const cy = this.canvas.height / 2;
 
-        // Massive Scale
         const heartSize = Math.min(this.canvas.width, this.canvas.height) * 0.5;
 
-        // STRICT Royal Velvet Red Palette (No Gold/White)
         const colors = [
-            '#8a0303', // Blood Red
-            '#b80a0a', // Deep Crimson
-            '#4a0000', // Dark Velvet
-            '#c70039', // Royal Red
-            '#900c3f'  // Burgundy
+            '#8a0303', '#b80a0a', '#4a0000', '#c70039', '#900c3f'
         ];
 
-        const step = 10; // Optimized spacing
+        const step = 14;
         for (let gx = -heartSize * 1.3; gx < heartSize * 1.3; gx += step) {
             for (let gy = -heartSize * 1.5; gy < heartSize * 1.2; gy += step) {
                 const rx = gx + (Math.random() - 0.5) * step * 0.8;
@@ -160,9 +151,9 @@ class HeartFirework {
                     tx: cx + rx, ty: cy + ry,
                     x: cx, y: cy,
                     color: colors[Math.floor(Math.random() * colors.length)],
-                    size: Math.random() * 6 + 4, // Large visible hearts
+                    size: Math.random() * 6 + 5,
                     alpha: 0,
-                    maxAlpha: 0.9,
+                    maxAlpha: 0.95,
                     delay: Math.random() * 6,
                     duration: 40 + Math.random() * 10,
                     drift: (Math.random() - 0.5) * 1.5,
@@ -197,13 +188,12 @@ class HeartFirework {
                 p.rotation += p.rotSpeed;
             }
 
-            if (this.frame > 70) p.alpha -= 0.02;
-            else p.alpha = Math.min(p.maxAlpha, p.alpha + 0.05);
+            if (this.frame > 70) p.alpha -= 0.03;
+            else p.alpha = Math.min(p.maxAlpha, p.alpha + 0.08);
 
             if (p.alpha > 0) {
                 alive++;
                 ctx.globalAlpha = p.alpha;
-
                 ctx.save();
                 ctx.translate(p.x, p.y);
                 ctx.rotate(p.rotation * Math.PI / 180);

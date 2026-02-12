@@ -305,6 +305,13 @@ body {
     z-index: 1;
 }
 
+@media (max-width: 768px) {
+    .hero {
+        background-attachment: scroll;
+        /* Fix mobile repaint lag */
+    }
+}
+
 /* Overlay for text readability */
 .hero::before {
     content: '';
@@ -349,10 +356,12 @@ body {
 
 .sticker-girl {
     animation: floatLeft 3s ease-in-out infinite;
+    will-change: transform;
 }
 
 .sticker-boy {
     animation: floatRight 3s ease-in-out infinite;
+    will-change: transform;
 }
 
 @keyframes floatLeft {
